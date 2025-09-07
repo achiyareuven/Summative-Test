@@ -6,10 +6,11 @@ import datetime
 
 audio_file_path = Path(r"C:\Users\achiy\PycharmProjects\Summative-Test\podcasts\download.wav")
 file_stats = audio_file_path.stat()
-# Extract creation timestamp (st_ctime)
-# creation_timestamp = file_stats.st_ctime
-# creation_datetime = datetime.datetime.fromtimestamp(creation_timestamp)
-# print(f"The creation date of '{audio_file_path.name}' is: {creation_datetime}")
+a = file_stats.st_size
+print(a)
+creation_timestamp = file_stats.st_ctime
+creation_datetime = datetime.datetime.fromtimestamp(creation_timestamp)
+print(f"The creation date of '{audio_file_path.name}' is: {creation_datetime}")
 # timew = st.st_ctime()
 # print(timew)
 
