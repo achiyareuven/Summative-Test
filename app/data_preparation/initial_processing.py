@@ -18,7 +18,7 @@ class Processing:
                 dict_resulte["id"]=str(uuid.uuid4())
                 dict_resulte["absolute path"] = tag.filename
                 dict_resulte["name"] = audio_file.name
-                dict_resulte["creation_timestamp"] =datetime.datetime.fromtimestamp(creation_timestamp)
+                dict_resulte["creation_timestamp"] =datetime.datetime.fromtimestamp(creation_timestamp).isoformat()
                 dict_resulte["size"] = file_stats.st_size
                 dict_resulte["duration"] =tag.duration
                 return dict_resulte
