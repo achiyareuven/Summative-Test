@@ -1,6 +1,9 @@
 from pymongo import MongoClient
 from gridfs import GridFS
+from app.logger import Logger
 import os
+
+logger = Logger.get_logger()
 
 class MongoDAL:
     def __init__(self, url, db_name, collection):
@@ -16,13 +19,11 @@ class MongoDAL:
         try:
             with open(audio_file_path, 'rb') as audio_data:
                 file_id = self.fs.put(audio_data, _id=id_file)
-                print(f"Audio file saved with ID: {file_id}")
+                logger.info(f"Audio file saved with ID: {file_id}")
         except FileNotFoundError:
-            print(f"Error: Audio file not found at {audio_file_path}")
+            logger.error(f"Error: Audio file not found at {audio_file_path}")
         except Exception as e:
-            print(f"An error occurred: {e}")
-
-
+            logger.error(f"An error occurred: {e}")
 
     def close(self):
         self.client.close()

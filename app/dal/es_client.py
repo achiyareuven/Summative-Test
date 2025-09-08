@@ -1,31 +1,36 @@
 from elasticsearch import Elasticsearch, exceptions
 from elasticsearch.helpers import bulk
+from app.logger import Logger
+
+logger = Logger.get_logger()
+
 
 class Elastic:
     def __init__(self, url: str, index_name: str, timeout: int = 30):
         self.url = url
         self.index_name = index_name
         self.timeout = timeout
-        self.es = Elasticsearch(self.url, request_timeout=self.timeout)
 
         try:
-            self.es = Elasticsearch(self.url)
+            self.es = Elasticsearch(self.url, request_timeout=self.timeout)
             if not self.es.ping():
+                logger.error("Elasticsearch is not responding")
                 raise exceptions.ConnectionError("Elasticsearch is not responding")
             if not self.es.indices.exists(index=self.index_name):
                 self.es.indices.create(index=self.index_name)
         except Exception as e:
-            print(f"Failed to connect to Elasticsearch: {e}")
+            logger.error(f"Failed to connect to Elasticsearch: {e}")
             raise
 
 
     def index_doc(self, doc: dict, doc_id=None):
         try:
             result = self.es.index(index=self.index_name, id=doc_id, document=doc)
+            logger.info("Document indexing successfully ")
             return result
         except Exception as e:
-            print(f"Indexing failed: {e}")
-            raise
+            logger.error(f"Indexing doc failed: {e}")
+
 
 
     def delete_documents_by_id(self, ids: list):
