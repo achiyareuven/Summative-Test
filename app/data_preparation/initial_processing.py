@@ -15,7 +15,7 @@ class Processing:
             dict_resulte = {}
             if audio_file.is_file() and audio_file.suffix in [".mp3", ".wav", ".flac"]:
                 tag = TinyTag.get(str(audio_file))
-                dict_resulte["absolute path"] = tag.filename
+                dict_resulte["absolute_path"] = tag.filename
                 dict_resulte["name"] = audio_file.name
                 dict_resulte["creation_timestamp"] =datetime.datetime.fromtimestamp(creation_timestamp).isoformat()
                 dict_resulte["size"] = file_stats.st_size
