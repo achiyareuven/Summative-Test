@@ -1,5 +1,6 @@
 from kafka import KafkaConsumer
 from dotenv import load_dotenv
+from utils import generate_file_identifier
 import os
 import json
 
@@ -19,19 +20,21 @@ class Consumer:
             self.topic,
             value_deserializer=lambda m: json.loads(m.decode('utf-8')),
             bootstrap_servers=[self.bootstrap_servers],
-            consumer_timeout_ms=10000,
+
+            enable_auto_commit = False,
             auto_offset_reset='earliest',
             group_id=self.group_name
         )
+        def commit():
+            consumer.commit()
 
-        for msg in consumer:
-            yield msg.value
+        for record in consumer:
+            msg = record.value
+            msg["id"] =generate_file_identifier(msg["absolute_path"],msg["size"])
+
+            yield msg , commit
 
 
-p = Consumer("jjj","ds")
-o = p.get_consumer_events()
 
-for msg in o:
-    print(msg["id"])
 
-    # print(type(msg.values),f"value={msg.values}")
+
