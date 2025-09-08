@@ -1,4 +1,4 @@
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, exceptions
 from elasticsearch.helpers import bulk
 
 class Elastic:
@@ -7,40 +7,26 @@ class Elastic:
         self.index_name = index_name
         self.timeout = timeout
         self.es = Elasticsearch(self.url, request_timeout=self.timeout)
-        if not self.es.ping():
-            raise ValueError("Connection failed")
 
-    def create_index(self,):
         try:
+            self.es = Elasticsearch(self.url)
+            if not self.es.ping():
+                raise exceptions.ConnectionError("Elasticsearch is not responding")
             if not self.es.indices.exists(index=self.index_name):
-                self.es.indices.create(
-                    index=self.index_name,
-
-                )
+                self.es.indices.create(index=self.index_name)
         except Exception as e:
-            print(f"error creating index: {e}")
+            print(f"Failed to connect to Elasticsearch: {e}")
+            raise
 
 
-    def bulk_insert(self, docs: list,doc_id):
+    def index_doc(self, doc: dict, doc_id=None):
         try:
-            actions = (
-                {"_index": self.index_name, "_id": doc_id, "_source": doc}
-                for i, doc in enumerate(docs)
-            )
-            bulk(self.es, actions)
-            self.es.indices.refresh(index=self.index_name)
+            result = self.es.index(index=self.index_name, id=doc_id, document=doc)
+            return result
         except Exception as e:
-            print(f"error inserting documents: {e}")
+            print(f"Indexing failed: {e}")
+            raise
 
-    def ensure_field_mapping(self, field: str, field_mapping: dict):
-        mapping = self.es.indices.get_mapping(index=self.index_name)
-        properties = mapping[self.index_name]["mappings"].get("properties", {})
-        if field in properties:
-            return
-        self.es.indices.put_mapping(
-            index=self.index_name,
-            properties={field: field_mapping}
-        )
 
     def delete_documents_by_id(self, ids: list):
         try:
