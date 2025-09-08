@@ -2,8 +2,10 @@ from pathlib import Path
 import os
 from tinytag import TinyTag
 import datetime
+from app.logger import Logger
 import uuid
 
+logger = Logger.get_logger()
 
 class Processing:
 
@@ -20,11 +22,12 @@ class Processing:
                 dict_resulte["creation_timestamp"] =datetime.datetime.fromtimestamp(creation_timestamp).isoformat()
                 dict_resulte["size"] = file_stats.st_size
                 dict_resulte["duration"] =tag.duration
+                logger.info(f"Successfully extracted metadata into a dictionary for {audio_file}")
                 return dict_resulte
             else:
-                print(f"File not found: {audio_file}")
+                logger.error(f"File not found: {audio_file}")
         except Exception as e:
-            print(f"Error extracting metadata: {e}")
+            logger.error(f"Error extracting metadata: {e}")
 
 
 
