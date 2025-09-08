@@ -1,6 +1,10 @@
 from kafka import KafkaProducer
 import json
-import time
+from app.logger import Logger
+from kafka.errors import NoBrokersAvailable
+
+logger = Logger.get_logger()
+
 
 class Producer:
     def __init__(self, bootstrap_servers):
@@ -8,18 +12,17 @@ class Producer:
             bootstrap_servers=bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode('utf-8')
         )
-        print(f"KafkaProducer initialized for brokers: {bootstrap_servers}")
+        logger.info(f"KafkaProducer initialized for brokers: {bootstrap_servers}")
 
     def send_message(self, topic, value,key=None):
-
         try:
             future = self.producer.send(topic, key=key.encode('utf-8')if key else None, value=value)
             record_metadata = future.get(timeout=10)
-            print(f"Message sent to topic: {record_metadata.topic}, "
+            logger.info(f"Message sent to topic: {record_metadata.topic}, "
                   f"partition: {record_metadata.partition}, "
                   f"offset: {record_metadata.offset}")
         except Exception as e:
-            print(f"Error sending message: {e}")
+            logger.error(f"Error sending message kafka producer {e}")
 
     def flush_producer(self):
         self.producer.flush()
