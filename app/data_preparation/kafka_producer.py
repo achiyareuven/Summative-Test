@@ -3,7 +3,7 @@ import json
 import time
 
 class Producer:
-    def __init__(self, bootstrap_servers='localhost:9092'):
+    def __init__(self, bootstrap_servers):
         self.producer = KafkaProducer(
             bootstrap_servers=bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode('utf-8')
@@ -23,7 +23,7 @@ class Producer:
 
     def flush_producer(self):
         self.producer.flush()
-        self.producer.close()
+
 
 
 
