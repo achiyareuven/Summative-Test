@@ -3,6 +3,10 @@ from app.dal.es_client import Elastic
 from app.dal.mongo_dal import MongoDAL
 from app.save_data.kafka_consumer import Consumer
 from dotenv import load_dotenv
+from app.logger import Logger
+
+
+logger = Logger.get_logger()
 load_dotenv()
 
 MONGO_URL=os.getenv("MONGO_URL", "mongodb://localhost:27017/")
@@ -26,17 +30,20 @@ class Manager:
     def run(self):
         try:
             for msg, commit in self.consumer.get_consumer_events():
-                if not msg["id"] and not msg["absolute_path"]:
-                    print(f"No path or id found Skip message{msg}")
+                if not msg["id"] or not msg["absolute_path"]:
+                    logger.info(f"No path or id found Skip message{msg}")
                     continue
                 self.mongo.insert_audio_file(msg["absolute_path"],msg["id"])
 
-                self.elastic.index_doc(msg,msg["id"])
-                print("save ela")
 
+                if self.elastic.es.exists(index=self.elastic.index_name, id=msg["id"]):
+                    logger.info(f"Document with ID '{msg["id"]}'already exists in index '{self.elastic.index_name}'.")
+                else:
+                    self.elastic.index_doc(msg,msg["id"])
+                    logger.info(f"save doc with ID {msg["id"]} to elastic ")
                 commit()
         except Exception as e:
-            print(f"error save data {e}")
+            logger.error(f"error save data {e}")
 
 if __name__ == "__main__":
     elastic = Elastic(ES_URI, ES_INDEX)

@@ -20,7 +20,6 @@ class Consumer:
             self.topic,
             value_deserializer=lambda m: json.loads(m.decode('utf-8')),
             bootstrap_servers=[self.bootstrap_servers],
-
             enable_auto_commit = False,
             auto_offset_reset='earliest',
             group_id=self.group_name
