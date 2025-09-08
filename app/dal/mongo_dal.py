@@ -3,7 +3,7 @@ from gridfs import GridFS
 import os
 
 class MongoDAL:
-    def __init__(self, url=None, db_name=None, collection=None):
+    def __init__(self, url, db_name, collection):
         self.url = url or os.getenv("MONGO_URL", "mongodb://localhost:27017/")
         self.db_name = db_name or os.getenv("MONGO_DB", "appdb")
         self.collection_name = collection or os.getenv("MONGO_COLLECTION", "docs")
@@ -22,12 +22,6 @@ class MongoDAL:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-
-    # def list_all(self) -> list:
-    #
-    #         docs = list(self.fs.find())
-    #
-    #         return docs
 
 
     def close(self):
