@@ -7,12 +7,16 @@ import time
 
 load_dotenv()
 
+AUDIO_DIRECTORY= os.getenv("AUDIO_DIRECTORY",r"C:\Users\achiy\PycharmProjects\Summative-Test\podcasts")
+BOOTSTRAP_SERVERS= os.getenv("BOOTSTRAP_SERVERS","localhost:9092")
+KAFKA_TOPIC =os.getenv("KAFKA_TOPIC","audio_meta")
+
 
 class Manager:
-    def __init__(self,audio_directory:str = None):
-        self.audio_directory =Path (audio_directory or os.getenv("AUDIO_DIRECTORY",r"C:\Users\achiy\PycharmProjects\Summative-Test\podcasts"))
+    def __init__(self,audio_directory:str ):
+        self.audio_directory =Path(audio_directory)
         self.processor = Processing()
-        self.producer =Producer()
+        self.producer =Producer(BOOTSTRAP_SERVERS)
 
 
     def get_meta_data(self):
@@ -28,9 +32,8 @@ class Manager:
             time.sleep(0.1)
         self.producer.flush_producer()
 
+if __name__ == "__main__":
+    manager = Manager(AUDIO_DIRECTORY)
+    list_data = manager.get_meta_data()
+    manager.send_to_kafka(list_data, KAFKA_TOPIC)
 
-
-
-m = Manager()
-listi =m.get_meta_data()
-m.send_to_kafka(listi,"jjj")
