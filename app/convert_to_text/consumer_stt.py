@@ -13,11 +13,12 @@ class Consumer:
         self.topic = topic
         self.group_name = group
         self.bootstrap_servers = bootstrap_servers or os.getenv("BOOTSTRAP_SERVERS")
+        self.consumer = None
 
 
     def get_consumer_events(self):
         try:
-            consumer = KafkaConsumer(
+            self.consumer = KafkaConsumer(
                 self.topic,
                 value_deserializer=lambda m: json.loads(m.decode('utf-8')),
                 bootstrap_servers=[self.bootstrap_servers],
@@ -27,19 +28,22 @@ class Consumer:
             )
             logger.info(f"Kafka Consumer initialized for brokers: {self.bootstrap_servers}")
             def commit():
-                consumer.commit()
+                self.consumer.commit()
 
-            for record in consumer:
+            for record in self.consumer:
                 msg = record.value
 
                 yield msg , commit
 
         except NoBrokersAvailable:
-            logger.error("No Brokers Available to kafka")
+            logger.error(f"No Brokers Available to kafka  {self.bootstrap_servers} failed")
             raise
 
         except Exception as e:
             logger.error(f"error {e}")
+
+        finally:
+            self.consumer.close()
 
 
 
