@@ -1,4 +1,4 @@
-from multiprocessing.util import get_logger
+
 from pathlib import Path
 from app.data_preparation.initial_processing import Processing
 from app.data_preparation.kafka_producer import Producer
@@ -42,15 +42,18 @@ class Manager:
         try:
             for i, msg_data in enumerate(list_msg):
                 self.producer.send_message(kafka_topic, msg_data)
-                time.sleep(0.1)
+
             self.producer.flush_producer()
             logger.info("All files were sent successfully.")
         except Exception as e:
             logger.error(f"Error sending files in Kafka producer {e}")
 
 if __name__ == "__main__":
-    logger.info("The program has started")
-    manager = Manager(AUDIO_DIRECTORY)
-    list_data = manager.get_meta_data()
-    manager.send_to_kafka(list_data, KAFKA_TOPIC)
+    try:
+        logger.info("The program has started")
+        manager = Manager(AUDIO_DIRECTORY)
+        list_data = manager.get_meta_data()
+        manager.send_to_kafka(list_data, KAFKA_TOPIC)
+    finally:
+        manager.producer.flush_producer()
 

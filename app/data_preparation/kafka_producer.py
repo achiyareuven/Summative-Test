@@ -8,16 +8,19 @@ logger = Logger.get_logger()
 
 class Producer:
     def __init__(self, bootstrap_servers):
-        self.producer = KafkaProducer(
-            bootstrap_servers=bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode('utf-8')
-        )
-        logger.info(f"KafkaProducer initialized for brokers: {bootstrap_servers}")
-
-    def send_message(self, topic, value,key=None):
         try:
-            future = self.producer.send(topic, key=key.encode('utf-8')if key else None, value=value)
-            record_metadata = future.get(timeout=10)
+            self.producer = KafkaProducer(
+                bootstrap_servers=bootstrap_servers,
+                value_serializer=lambda v: json.dumps(v).encode('utf-8')
+            )
+            logger.info(f"KafkaProducer initialized for brokers: {bootstrap_servers}")
+        except NoBrokersAvailable:
+            logger.error(f"No Brokers Available to kafka{bootstrap_servers}")
+
+    def send_message(self, topic, value):
+        try:
+            future = self.producer.send(topic, value=value)
+            record_metadata = future.get()
             logger.info(f"Message sent to topic: {record_metadata.topic}, "
                   f"partition: {record_metadata.partition}, "
                   f"offset: {record_metadata.offset}")
@@ -26,6 +29,7 @@ class Producer:
 
     def flush_producer(self):
         self.producer.flush()
+        self.producer.close()
 
 
 
