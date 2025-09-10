@@ -42,8 +42,6 @@ class Manager:
         try:
             for i, msg_data in enumerate(list_msg):
                 self.producer.send_message(kafka_topic, msg_data)
-
-            self.producer.flush_producer()
             logger.info("All files were sent successfully.")
         except Exception as e:
             logger.error(f"Error sending files in Kafka producer {e}")
