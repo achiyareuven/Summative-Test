@@ -6,6 +6,7 @@ from app.convert_to_text.audio_processor import SpeachToText
 from dotenv import load_dotenv
 from app.logger import Logger
 from app.convert_to_text.utils_delete_file import remove_tmp_file
+from app.convert_to_text.producer_to_enrich import Producer
 
 
 logger = Logger.get_logger()
@@ -18,8 +19,11 @@ MONGO_COLLECTION = os.getenv("MONGO_COLLECTION", "docs")
 ES_URI = os.getenv("ES_URI","http://localhost:9200")
 ES_INDEX = os.getenv("ES_INDEX","audio_docs")
 
+BOOTSTRAP_SERVERS= os.getenv("BOOTSTRAP_SERVERS","localhost:9092")
 KAFKA_TOPIC_STT = os.getenv("KAFKA_TOPIC_STT","stt")
 KAFKA_GROUP_STT = os.getenv("KAFKA_GROUP_STT","convert_to_text")
+
+KAFKA_TOPIC_ENRICH = os.getenv("KAFKA_TOPIC_ENRICH","enrich")
 
 
 
@@ -29,6 +33,12 @@ class Manager:
         self.consumer = Consumer(KAFKA_TOPIC_STT,KAFKA_GROUP_STT)
         self.mongo= MongoDAL(MONGO_URL,MONGO_DB,MONGO_COLLECTION)
         self.sst = SpeachToText()
+        self.producer = Producer(BOOTSTRAP_SERVERS)
+
+
+    def get_text(self,path_audio_file):
+        text = self.sst.audio_to_text(path_audio_file)
+        return text
 
     def run(self):
         try:
@@ -40,9 +50,12 @@ class Manager:
                     if not self.elastic.check_field_exists_in_document(msg["id"],"text"):
 
                         path_audio_file= self.mongo.get_audio_file(msg["id"],msg["name"])
-                        self.elastic.update_doc(msg["id"],{"text":self.sst.audio_to_text(path_audio_file)})
+                        text = self.get_text(path_audio_file)
+                        self.elastic.update_doc(msg["id"],{"text":text})
 
                         remove_tmp_file(path_audio_file)
+
+                        self.producer.send_message(KAFKA_TOPIC_ENRICH,{"id":msg["id"],"text":text})
 
                     else:
                         logger.info(f"Document with ID '{msg["id"]}'already updated'")
