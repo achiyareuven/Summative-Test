@@ -33,7 +33,7 @@ class Consumer:
             for record in self.consumer:
                 msg = record.value
 
-                yield msg , commit()
+                yield msg , commit
 
         except NoBrokersAvailable:
             logger.error(f"No Brokers Available to kafka  {self.bootstrap_servers} failed")
