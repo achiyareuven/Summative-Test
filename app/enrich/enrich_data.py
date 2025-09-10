@@ -45,11 +45,16 @@ class TextProcessor:
             return "high"
 
     def get_dict_result_processing(self,text):
-        score = self.percent_bds(text)
-        level = self.bds_level(score)
-        is_bds = self.is_bds(score)
-        return {
-            "bds_percent":score,
-            "bds_level":level,
-            "is_bds":is_bds
-        }
+        try:
+            score = self.percent_bds(text)
+            level = self.bds_level(score)
+            is_bds = self.is_bds(score)
+            logger.info("Text analysis to add fields was successful.")
+            return {
+                "bds_percent":score,
+                "bds_level":level,
+                "is_bds":is_bds
+            }
+
+        except Exception as e:
+            logger.error(f"Text parsing to add fields failed. {e}")
