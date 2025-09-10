@@ -3,6 +3,7 @@ from gridfs import GridFS
 from app.logger import Logger
 import os
 import tempfile
+
 logger = Logger.get_logger()
 
 class MongoDAL:
@@ -39,6 +40,17 @@ class MongoDAL:
             logger.error(f"File not found with id {id_file}")
         except Exception as e:
             logger.error(f"error to get file from mongo with id {id_file}")
+
+    def get_temp_audio_file(self,id_file,file_name):
+            file_data = self.fs.get(id_file)
+            fd, temp_path =tempfile.mkstemp()
+            os.close(fd)
+            with open(temp_path,"wb") as output_file:
+                output_file.write(file_data.read())
+                logger.info("File downloaded successfully")
+            return output_file.name
+
+
 
 
     def close(self):

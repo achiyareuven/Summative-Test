@@ -49,7 +49,7 @@ class Manager:
                         continue
                     if not self.elastic.check_field_exists_in_document(msg["id"],"text"):
 
-                        path_audio_file= self.mongo.get_audio_file(msg["id"],msg["name"])
+                        path_audio_file= self.mongo.get_temp_audio_file(msg["id"],msg["name"])
                         text = self.get_text(path_audio_file)
                         self.elastic.update_doc(msg["id"],{"text":text})
 
