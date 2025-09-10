@@ -9,7 +9,7 @@ from app.convert_to_text.audio_processor import SpeachToText
 
 a = MongoDAL("mongodb://localhost:27017/","appdb","docs")
 b= SpeachToText()
-s =a.get_audio_file("b7e9f668b2b832c6c185694b9472588d6d8e2bb2e157d638bc6b79e26c1c47db","download (33).wav")
+s =a.get_temp_audio_file("b7e9f668b2b832c6c185694b9472588d6d8e2bb2e157d638bc6b79e26c1c47db","download (33).wav")
 
 # print(b.audio_to_text(s))
 print(s)
