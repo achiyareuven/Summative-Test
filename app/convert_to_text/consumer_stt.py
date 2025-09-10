@@ -24,6 +24,7 @@ class Consumer:
                 bootstrap_servers=[self.bootstrap_servers],
                 enable_auto_commit = False,
                 auto_offset_reset='earliest',
+                max_poll_interval_ms=800000,
                 group_id=self.group_name
             )
             logger.info(f"Kafka Consumer initialized for brokers: {self.bootstrap_servers}")
