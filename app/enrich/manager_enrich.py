@@ -1,13 +1,11 @@
 import os
 from app.dal.es_client import Elastic
-from app.dal.mongo_dal import MongoDAL
 from app.enrich.consumer_enrich import Consumer
 from app.enrich.enrich_data import TextProcessor
-from app.enrich.utils_clear_text import *
 from app.enrich.utils_decode import decode_base64
 from dotenv import load_dotenv
 from app.logger import Logger
-from app.convert_to_text.utils_delete_file import remove_tmp_file
+
 
 
 logger = Logger.get_logger()
@@ -17,7 +15,7 @@ ES_URI = os.getenv("ES_URI","http://localhost:9200")
 ES_INDEX = os.getenv("ES_INDEX","audio_docs")
 
 KAFKA_TOPIC_ENRICH = os.getenv("KAFKA_TOPIC_ENRICH","enrich")
-KAFKA_GROUP_ENRICH = os.getenv("KAFKA_GROUP_ENRICH","enrich_data")
+KAFKA_GROUP_ENRICH = os.getenv("KAFKA_GROUP_ENRICH","enriching_data")
 
 HOSTILE = os.getenv("HOSTILE")
 HOSTILE_LESS = os.getenv("HOSTILE_LESS")
@@ -32,7 +30,7 @@ class Manager:
 
 
     def get_new_fields(self,text):
-        dict_new_fields = self.get_new_fields(text)
+        dict_new_fields = self.text_process.get_dict_result_processing(text)
         return dict_new_fields
 
 
